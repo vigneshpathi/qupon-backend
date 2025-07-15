@@ -1,0 +1,22 @@
+# Node modules
+/node_modules/
+
+# Log files
+logs
+*.log
+npm-debug.log*
+
+# VSCode settings
+.vscode/
+
+# Build or dist folders (if any)
+dist/
+build/
+
+# Optional debug files
+*.local
+
+# Process manager logs
+pids
+*.pid
+*.seed
