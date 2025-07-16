@@ -66,7 +66,37 @@ const addCoupon = async (req, res) => {
     }
 };
 
+const updateCouponStatus = async (req, res) => {
+  const { couponId, status } = req.query;
+
+  // validate inputs
+  const allowedStatuses = ["approved", "rejected"];
+  if (!couponId || !status) {
+    return res.status(400).json({ message: "couponId and status are required in query" });
+  }
+  if (!allowedStatuses.includes(status)) {
+    return res.status(400).json({ message: `Invalid status. Must be one of: ${allowedStatuses.join(", ")}` });
+  }
+
+  try {
+    const coupon = await Coupon.findOneAndUpdate(
+      { couponId },
+      { status },
+      { new: true }
+    );
+
+    if (!coupon) {
+      return res.status(404).json({ message: "Coupon not found" });
+    }
+
+    res.status(200).json({ message: `Coupon ${status}`, data: coupon });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = { addCoupon,
     getAllCoupons,
-    getCouponsByCategory
+    getCouponsByCategory,
+    updateCouponStatus
  };
