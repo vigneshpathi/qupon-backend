@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { addCoupon, getAllCoupons, getCouponsByCategory } = require("../controllers/couponController");
+const { addCoupon, getAllCoupons, getCouponsByCategory, updateCouponStatus } = require("../controllers/couponController");
 const multer = require("multer");
 
 const storage = multer.diskStorage({
@@ -18,5 +18,6 @@ const upload = multer({ storage });
 router.post("/", upload.single("termsAndConditionImage"), addCoupon);
 router.get("/", getAllCoupons);
 router.get("/category", getCouponsByCategory);
+router.put('/update-status', updateCouponStatus);
 
 module.exports = router;

@@ -8,7 +8,14 @@ const couponSchema = new mongoose.Schema({
     couponCode: { type: String, required: true, unique: true },
     expireDate: { type: Date, required: true },
     percentage: { type: Number, required: true },
-    termsAndConditionImage: { type: String, required: true }
+    termsAndConditionImage: { type: String, required: true },
+
+    status: {
+        type: String,
+        enum: ["not_verified", "approved", "rejected", "sold", "expired"],
+        default: "not_verified"
+
+    },
 }, { timestamps: true });
 
 module.exports = mongoose.model("Coupon", couponSchema);

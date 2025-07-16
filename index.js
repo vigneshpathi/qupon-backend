@@ -4,6 +4,8 @@ const connectDB = require("../server/confiq/db");
 const userRoutes = require("./routes/userRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const couponRoutes = require("./routes/couponRoutes");
+require("./jobs/expireCoupons");
+
 
 dotenv.config();
 connectDB();
