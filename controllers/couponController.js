@@ -22,7 +22,7 @@ const getCouponsByCategory = async (req, res) => {
 
 const getAllCoupons = async (req, res) => {
     try {
-        const coupons = await Coupon.find({}, 'couponId userId brandName couponCode expireDate percentage termsAndConditionImage');
+        const coupons = await Coupon.find({}, 'couponId userId brandName couponCode expireDate price termsAndConditionImage');
         res.status(200).json(coupons);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -37,7 +37,6 @@ const addCoupon = async (req, res) => {
         brandName,
         couponCode,
         expireDate,
-        percentage,
         termsAndConditionImage
     } = req.body;
 
@@ -86,7 +85,6 @@ const addCoupon = async (req, res) => {
             brandName,
             couponCode,
             expireDate,
-            percentage,
             termsAndConditionImage,
             status: "not_verified",
         });
@@ -131,9 +129,74 @@ const updateCouponStatus = async (req, res) => {
     }
 };
 
+const getCouponById = async (req, res) => {
+    const { couponId } = req.params;
+
+    if (!couponId) {
+        return res.status(400).json({ message: "Coupon ID is required" });
+    }
+
+    try {
+        const coupon = await Coupon.findOne({ couponId });
+
+        if (!coupon) {
+            return res.status(404).json({ message: "Coupon not found" });
+        }
+
+        res.status(200).json(coupon);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const editCoupon = async (req, res) => {
+    const { couponId } = req.params;
+    const updates = req.body;
+
+    try {
+        const coupon = await Coupon.findOneAndUpdate(
+            { couponId },
+            updates,
+            { new: true }
+        );
+
+        if (!coupon) {
+            return res.status(404).json({ message: "Coupon not found" });
+        }
+
+        res.status(200).json({ message: "Coupon updated successfully", data: coupon });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const getCouponsByUser = async (req, res) => {
+    const { userId } = req.params;
+
+    if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+    }
+
+    try {
+        const coupons = await Coupon.find({ userId });
+
+        if (coupons.length === 0) {
+            return res.status(404).json({ message: "No coupons found for this user" });
+        }
+
+        res.status(200).json(coupons);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
 module.exports = {
     addCoupon,
     getAllCoupons,
     getCouponsByCategory,
-    updateCouponStatus
+    updateCouponStatus,
+    getCouponById,
+    editCoupon,
+    getCouponsByUser
 };
