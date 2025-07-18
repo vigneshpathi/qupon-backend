@@ -4,6 +4,7 @@ const connectDB = require("../server/confiq/db");
 const userRoutes = require("./routes/userRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const couponRoutes = require("./routes/couponRoutes");
+const { swaggerUi, swaggerSpec } = require("./confiq/swagger"); 
 require("./jobs/expireCoupons");
 
 
@@ -13,6 +14,7 @@ connectDB();
 const app = express();
 app.use(express.json());
 
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api/users", userRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/coupons", couponRoutes);
