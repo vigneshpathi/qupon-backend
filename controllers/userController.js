@@ -1,12 +1,21 @@
 const User = require('../models/User');
+const admin = require("../confiq/firebase");
 
 const registerUser = async (req, res) => {
-  const { firstName, lastName, email, dob } = req.body;
+  const { firstName, lastName, email, dob, firebaseToken } = req.body;
+
 
   try {
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: "User already exists" });
+    const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
+    const phoneNumber = decodedToken.phone_number;
+
+    if (!phoneNumber) {
+      return res.status(400).json({ message: "Phone number not found in token" });
+    }
+
+    const existingUser = await User.findOne({ $or: [{ email }, { phoneNumber }] });
+    if (existingUser) {
+      return res.status(409).json({ message: "User already exists" });
     }
 
     // Get total number of existing users to generate incremental ID
@@ -18,6 +27,7 @@ const registerUser = async (req, res) => {
       firstName,
       lastName,
       email,
+      phoneNumber,
       dob
     });
 
