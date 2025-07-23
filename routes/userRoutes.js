@@ -29,9 +29,9 @@ const {
  *           schema:
  *             type: object
  *             properties:
- *               phone:
+ *               IdToken:
  *                 type: string
- *                 example: "+919876543210"
+ *                 example: "abcd#89"
  *     responses:
  *       200:
  *         description: Phone number saved successfully
