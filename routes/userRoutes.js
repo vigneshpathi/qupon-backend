@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const { 
-  registerUser, 
+  createUserWithPhone,
+  completeUserProfile, 
   updateUserProfile, 
   getAllUsers, 
   deleteUser, 
@@ -17,9 +18,9 @@ const {
 
 /**
  * @swagger
- * /users/register:
+ * /users/phone:
  *   post:
- *     summary: Register a new user
+ *     summary: Create a new user with phone number
  *     tags: [Users]
  *     requestBody:
  *       required: true
@@ -27,26 +28,47 @@ const {
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - firstName
- *               - lastName
- *               - email
- *               - dob
  *             properties:
- *               firstName:
+ *               phone:
  *                 type: string
- *               lastName:
- *                 type: string
- *               email:
- *                 type: string
- *               dob:
- *                 type: string
- *                 format: date
+ *                 example: "+919876543210"
  *     responses:
- *       201:
- *         description: User registered successfully
+ *       200:
+ *         description: Phone number saved successfully
+ *       400:
+ *         description: Bad request
  */
-router.post("/register", registerUser);
+router.post("/phone", createUserWithPhone);
+
+/**
+ * @swagger
+ * /users/register:
+ *   post:
+ *     summary: Complete registration by adding user profile details
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               phone:
+ *                 type: string
+ *                 example: "+919876543210"
+ *               name:
+ *                 type: string
+ *                 example: "John Doe"
+ *               address:
+ *                 type: string
+ *                 example: "123 Main St"
+ *     responses:
+ *       200:
+ *         description: User registered successfully
+ *       404:
+ *         description: Phone number not found
+ */
+router.post("/register", completeUserProfile);
 
 /**
  * @swagger
@@ -97,6 +119,8 @@ router.put("/profile/:userId", updateUserProfile);
  *     responses:
  *       200:
  *         description: User found
+ *       404:
+ *         description: User not found
  */
 router.get("/search", getUserByEmail);
 

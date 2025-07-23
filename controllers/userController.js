@@ -1,32 +1,60 @@
 const User = require('../models/User');
 
-const registerUser = async (req, res) => {
+const createUserWithPhone = async (req, res) => {
+  const { idToken } = req.body;
+
+  if (!idToken) {
+    return res.status(400).json({ message: "Firebase ID token is required" });
+  }
+
+  try {
+    // 1. Verify the token using Firebase Admin SDK
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const phone = decodedToken.phone_number;
+
+    if (!phone) {
+      return res.status(400).json({ message: "Invalid token: Phone number not found" });
+    }
+
+    // 2. Check if user already exists
+    let user = await User.findOne({ phone });
+    if (user) {
+      return res.status(200).json({ message: "Phone already exists", data: user });
+    }
+
+    // 3. Create new user with custom userId
+    const totalUsers = await User.countDocuments();
+    const newUserId = `USER${(totalUsers + 1).toString().padStart(3, '0')}`;
+
+    user = await User.create({ phone, userId: newUserId });
+
+    return res.status(201).json({ message: "User registered", data: user });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(401).json({ message: "Unauthorized or invalid token", error: err.message });
+  }
+};
+
+const completeUserProfile = async (req, res) => {
+  const { userId } = req.params;
   const { firstName, lastName, email, dob } = req.body;
 
   try {
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: "User already exists" });
-    }
+    const user = await User.findOne({ userId });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Get total number of existing users to generate incremental ID
-    const totalUsers = await User.countDocuments();
-    const newUserId = `USER${(totalUsers + 1).toString().padStart(3, '0')}`; // USER001, USER002...
+    user.firstName = firstName || user.firstName;
+    user.lastName = lastName || user.lastName;
+    user.email = email || user.email;
+    user.dob = dob || user.dob;
+    user.isProfileCompleted = true;
 
-    const user = await User.create({
-      userId: newUserId,
-      firstName,
-      lastName,
-      email,
-      dob
-    });
+    await user.save();
 
-    res.status(201).json({
-      message: "User registered successfully",
-      data: user
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(200).json({ message: "Profile completed", data: user });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
 
@@ -105,7 +133,8 @@ const deleteUser = async (req, res) => {
 
 
 module.exports = {
-  registerUser,
+  createUserWithPhone,
+  completeUserProfile,
   getAllUsers,
   updateUserProfile,
   deleteUser,
